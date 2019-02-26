@@ -1,9 +1,12 @@
 package com.example.contacts;
 
+import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -14,17 +17,32 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private List<Contact> phoneBook;
+    private ListView lvMain;
+    private int position;
+    private ArrayAdapter<Contact> adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_view);
 
-        ListView lvMain = findViewById(R.id.lvMain);
+        lvMain = findViewById(R.id.lvMain);
 
-        List<Contact> phoneBook = createContacts();
+        phoneBook = createContacts();
 
-        ArrayAdapter<Contact> adapter = new ContactAdapter(this, R.layout.contact, phoneBook);
+        adapter = new ContactAdapter(this, R.layout.contact, phoneBook);
         lvMain.setAdapter(adapter);
+
+        lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MainActivity.this.position = position;
+                Intent intent = new Intent(MainActivity.this, PhoneActivity.class);
+                intent.putExtra("contact", phoneBook.get(position));
+                startActivityForResult(intent, 1);
+            }
+        });
 
 
 ////        LinearLayout linLayout = findViewById(R.id.linLayout);
@@ -40,6 +58,15 @@ public class MainActivity extends AppCompatActivity {
 //            item.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
 //            linLayout.addView(item);
 //        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (data == null) return;
+        Contact contact = (Contact) data.getSerializableExtra("contact");
+        phoneBook.remove(position);
+        phoneBook.add(position, contact);
+        adapter.notifyDataSetChanged();
     }
 
     private List<Contact> createContacts() {
