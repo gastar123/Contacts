@@ -26,7 +26,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<Contact> phoneBook;
+    private final List<Contact> phoneBook = new ArrayList<>();
     private ListView lvMain;
     private int position;
     private ArrayAdapter<Contact> adapter;
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         }
         // если разрешение установлено, загружаем контакты
         if (READ_CONTACTS_GRANTED) {
-            phoneBook = getContacts();
+            getContacts();
         }
 
         lvMain = findViewById(R.id.lvMain);
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         }
         if (READ_CONTACTS_GRANTED) {
-            phoneBook = getContacts();
+            getContacts();
         } else {
             Toast.makeText(this, "Требуется установить разрешения", Toast.LENGTH_LONG).show();
         }
@@ -101,9 +101,8 @@ public class MainActivity extends AppCompatActivity {
      *
      * @return список контактов приложения
      */
-    private List<Contact> getContacts() {
-        List<Contact> phoneBook = new ArrayList<>();
-
+    private void getContacts() {
+        phoneBook.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cur = db.query("phones", null, null, null, null, null, null);
         while (cur != null && cur.moveToNext()) {
@@ -113,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
         }
         cur.close();
         dbHelper.close();
-        return phoneBook;
     }
 
     /**
@@ -158,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 0, "synchronize");
+        menu.add(0, 2, 0, "delete all");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -165,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 1) {
             syncPhoneBook();
+        } else if (item.getItemId() == 2) {
+            deletePhoneBook();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -179,7 +180,15 @@ public class MainActivity extends AppCompatActivity {
             db.insert("phones",null, cv);
         }
         dbHelper.close();
-        phoneBook = getContacts();
+        getContacts();
+        adapter.notifyDataSetChanged();
+    }
+
+    private void deletePhoneBook() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.delete("phones",null,null);
+        db.close();
+        getContacts();
         adapter.notifyDataSetChanged();
     }
 }
