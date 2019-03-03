@@ -13,6 +13,7 @@ public class PhoneActivity extends AppCompatActivity implements View.OnClickList
     private EditText etName;
     private EditText etPhone;
     private Contact contact;
+    private int requestCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +26,11 @@ public class PhoneActivity extends AppCompatActivity implements View.OnClickList
         etPhone = findViewById(R.id.etPhone);
         btnEnter = findViewById(R.id.btnEnter);
 
-        etName.setText(contact.getName());
-        etPhone.setText(contact.getPhone());
+        requestCode = getIntent().getExtras().getInt("requestCode");
+        if (requestCode == 1) {
+            etName.setText(contact.getName());
+            etPhone.setText(contact.getPhone());
+        }
 
         btnEnter.setOnClickListener(this);
     }
@@ -34,8 +38,12 @@ public class PhoneActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         Intent intent = getIntent();
-        contact.setName(etName.getText().toString());
-        contact.setPhone(etPhone.getText().toString());
+        if (requestCode == 1) {
+            contact.setName(etName.getText().toString());
+            contact.setPhone(etPhone.getText().toString());
+        } else if (requestCode == 2) {
+            contact = new Contact(etName.getText().toString(), etPhone.getText().toString());
+        }
         intent.putExtra("contact", contact);
         setResult(RESULT_OK, intent);
         finish();

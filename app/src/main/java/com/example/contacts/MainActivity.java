@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private int position;
     private ArrayAdapter<Contact> adapter;
     private DBHelper dbHelper;
+    private final int CHANGE_CONTACT = 1;
+    private final int ADD_CONTACT = 2;
 
     private static final int REQUEST_CODE_READ_CONTACTS = 1;
     private static boolean READ_CONTACTS_GRANTED = false;
@@ -66,10 +68,17 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MainActivity.this.position = position;
                 Intent intent = new Intent(MainActivity.this, PhoneActivity.class);
+                intent.putExtra("requestCode", CHANGE_CONTACT);
                 intent.putExtra("contact", phoneBook.get(position));
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, CHANGE_CONTACT);
             }
         });
+    }
+
+    public void addContact(View v) {
+        Intent intent = new Intent(this, PhoneActivity.class);
+        intent.putExtra("requestCode", ADD_CONTACT);
+        startActivityForResult(intent, ADD_CONTACT);
     }
 
     @Override
@@ -91,9 +100,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (data == null) return;
+        ContentValues cv = new ContentValues();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         Contact contact = (Contact) data.getSerializableExtra("contact");
-        phoneBook.remove(position);
-        phoneBook.add(position, contact);
+        switch (requestCode) {
+            case CHANGE_CONTACT:
+                cv.put("name", contact.getName());
+                cv.put("phone", contact.getPhone());
+                db.update("phones", cv, "id = " + contact.getId(), null);
+//                phoneBook.remove(position);
+//                phoneBook.add(position, contact);
+                break;
+            case ADD_CONTACT:
+                cv.put("name", contact.getName());
+                cv.put("phone", contact.getPhone());
+                db.insert("phones", null, cv);
+                break;
+        }
+        dbHelper.close();
+        getContacts();
         adapter.notifyDataSetChanged();
     }
 
@@ -106,9 +131,10 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cur = db.query("phones", null, null, null, null, null, null);
         while (cur != null && cur.moveToNext()) {
+            int id = cur.getInt(cur.getColumnIndex("id"));
             String name = cur.getString(cur.getColumnIndex("name"));
             String phone = cur.getString(cur.getColumnIndex("phone"));
-            phoneBook.add(new Contact(name, phone));
+            phoneBook.add(new Contact(id, name, phone));
         }
         cur.close();
         dbHelper.close();
@@ -150,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return phoneBook;
     }
-
 
 
     @Override
