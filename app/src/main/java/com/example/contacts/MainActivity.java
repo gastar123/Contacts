@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         for (Contact c : getAndroidContacts()) {
             try {
                 cv.put("name", c.getName());
-                cv.put("phone", c.getPhone().replaceAll("[ -()]", ""));
+                cv.put("phone", c.getPhone().replaceAll("[ \\-()]", ""));
                 db.insert("phones", null, cv);
             } catch (SQLiteConstraintException e) {
             }
