@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
@@ -28,11 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
     private final List<Contact> phoneBook = new ArrayList<>();
     private ListView lvMain;
-    private int position;
     private ArrayAdapter<Contact> adapter;
     private DBHelper dbHelper;
-    private final int CHANGE_CONTACT = 1;
-    private final int ADD_CONTACT = 2;
+    static final int CHANGE_CONTACT = 1;
+    static final int ADD_CONTACT = 2;
 
     private static final int REQUEST_CODE_READ_CONTACTS = 1;
     private static boolean READ_CONTACTS_GRANTED = false;
@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MainActivity.this.position = position;
                 Intent intent = new Intent(MainActivity.this, PhoneActivity.class);
                 intent.putExtra("requestCode", CHANGE_CONTACT);
                 intent.putExtra("contact", phoneBook.get(position));
@@ -108,8 +107,6 @@ public class MainActivity extends AppCompatActivity {
                 cv.put("name", contact.getName());
                 cv.put("phone", contact.getPhone());
                 db.update("phones", cv, "id = " + contact.getId(), null);
-//                phoneBook.remove(position);
-//                phoneBook.add(position, contact);
                 break;
             case ADD_CONTACT:
                 cv.put("name", contact.getName());
@@ -123,13 +120,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @return список контактов приложения
      */
     private void getContacts() {
         phoneBook.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cur = db.query("phones", null, null, null, null, null, null);
+        Cursor cur = db.query("phones", null, null, null, null, null, "LOWER(name)");
         while (cur != null && cur.moveToNext()) {
             int id = cur.getInt(cur.getColumnIndex("id"));
             String name = cur.getString(cur.getColumnIndex("name"));
@@ -141,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @return список контактов телефона
      */
     private List<Contact> getAndroidContacts() {
@@ -149,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
         ContentResolver cr = getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, ContactsContract.Contacts.DISPLAY_NAME);
+                null, null, null, null);
         while (cur != null && cur.moveToNext()) {
             String id = cur.getString(
                     cur.getColumnIndex(ContactsContract.Contacts._ID));
@@ -177,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
         return phoneBook;
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 0, "synchronize");
@@ -199,10 +193,13 @@ public class MainActivity extends AppCompatActivity {
         ContentValues cv = new ContentValues();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        for (Contact c: getAndroidContacts()) {
-            cv.put("name", c.getName());
-            cv.put("phone", c.getPhone());
-            db.insert("phones",null, cv);
+        for (Contact c : getAndroidContacts()) {
+            try {
+                cv.put("name", c.getName());
+                cv.put("phone", c.getPhone().replaceAll("[ -()]", ""));
+                db.insert("phones", null, cv);
+            } catch (SQLiteConstraintException e) {
+            }
         }
         dbHelper.close();
         getContacts();
@@ -211,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void deletePhoneBook() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        db.delete("phones",null,null);
+        db.delete("phones", null, null);
         db.close();
         getContacts();
         adapter.notifyDataSetChanged();

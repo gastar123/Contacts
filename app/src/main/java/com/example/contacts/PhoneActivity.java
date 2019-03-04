@@ -27,9 +27,11 @@ public class PhoneActivity extends AppCompatActivity implements View.OnClickList
         btnEnter = findViewById(R.id.btnEnter);
 
         requestCode = getIntent().getExtras().getInt("requestCode");
-        if (requestCode == 1) {
+        if (requestCode == MainActivity.CHANGE_CONTACT) {
             etName.setText(contact.getName());
             etPhone.setText(contact.getPhone());
+        } else if (requestCode == MainActivity.ADD_CONTACT) {
+            contact = new Contact("", "");
         }
 
         btnEnter.setOnClickListener(this);
@@ -37,13 +39,21 @@ public class PhoneActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        Intent intent = getIntent();
-        if (requestCode == 1) {
-            contact.setName(etName.getText().toString());
-            contact.setPhone(etPhone.getText().toString());
-        } else if (requestCode == 2) {
-            contact = new Contact(etName.getText().toString(), etPhone.getText().toString());
+        boolean error = false;
+        if (etName.getText().toString().equals("")) {
+            etName.setError("Empty name!");
+            error = true;
         }
+        if (etPhone.getText().toString().equals("")) {
+            etPhone.setError("Empty phone!");
+            error = true;
+        }
+        if (error) {
+            return;
+        }
+        Intent intent = getIntent();
+        contact.setName(etName.getText().toString());
+        contact.setPhone(etPhone.getText().toString());
         intent.putExtra("contact", contact);
         setResult(RESULT_OK, intent);
         finish();

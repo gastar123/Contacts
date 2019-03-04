@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context) {
-        super(context, "phoneDB", null, 1);
+        super(context, "phoneDB", null, 2);
     }
 
     @Override
@@ -15,11 +15,17 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table phones ("
                 + "id integer primary key autoincrement,"
                 + "name text,"
-                + "phone text);");
+                + "phone text UNIQUE);");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        if (oldVersion == 1 && newVersion == 2) {
+            db.execSQL("drop table phones;");
+            db.execSQL("create table phones ("
+                    + "id integer primary key autoincrement,"
+                    + "name text,"
+                    + "phone text UNIQUE);");
+        }
     }
 }
