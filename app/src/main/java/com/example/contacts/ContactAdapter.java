@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         tvName.setText(contact.getName());
         TextView tvNumber = convertView.findViewById(R.id.tvNumber);
         tvNumber.setText(contact.getPhone());
-        ImageButton call = convertView.findViewById(R.id.call);
+        ImageView call = convertView.findViewById(R.id.call);
         call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

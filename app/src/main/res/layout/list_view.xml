@@ -25,20 +25,14 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton"
+    <ImageView
+        android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
-        android:clickable="true"
         android:onClick="addContact"
-        android:scaleType="fitXY"
-        android:scaleX="2"
-        android:scaleY="2"
-        android:src="@drawable/baseline_add_circle_black_48"
-        app:backgroundTint="@android:color/transparent"
-        app:elevation="0dp" />
+        app:srcCompat="@drawable/baseline_add_circle_black_48" />
 
 </android.support.design.widget.CoordinatorLayout>

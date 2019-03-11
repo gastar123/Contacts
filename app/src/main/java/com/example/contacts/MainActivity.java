@@ -17,8 +17,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -70,6 +74,35 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("requestCode", CHANGE_CONTACT);
                 intent.putExtra("contact", phoneBook.get(position));
                 startActivityForResult(intent, CHANGE_CONTACT);
+            }
+        });
+
+        lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
+            Animation anim = AnimationUtils.loadAnimation(MainActivity.this, R.anim.mytrans);
+            Animation anim_two = AnimationUtils.loadAnimation(MainActivity.this, R.anim.anim_two);
+            ImageView imageView = findViewById(R.id.imageView);
+
+            private int prevFirstItem;
+            private boolean start = true;
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (prevFirstItem < firstVisibleItem && start) {
+                    imageView.startAnimation(anim);
+                    start = false;
+                }
+
+                if (prevFirstItem > firstVisibleItem && !start) {
+                    imageView.startAnimation(anim_two);
+                    start = true;
+                }
+
+                prevFirstItem = firstVisibleItem;
             }
         });
     }
