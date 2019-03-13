@@ -30,11 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private PhonePresenter presenter;
 
-    private final List<Contact> phoneBook = new ArrayList<>();
     private ListView lvMain;
     private ArrayAdapter<Contact> adapter;
-    private DBHelper dbHelper;
     static final int CHANGE_CONTACT = 1;
     static final int ADD_CONTACT = 2;
 
@@ -45,10 +44,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_view);
+        init();
 
-        dbHelper = new DBHelper(this);
 
-        // получаем разрешения
+
+// получаем разрешения
         int hasReadContactPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS);
         // если устройство до API 23, устанавливаем разрешение
         if (hasReadContactPermission == PackageManager.PERMISSION_GRANTED) {
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         }
         // если разрешение установлено, загружаем контакты
         if (READ_CONTACTS_GRANTED) {
-            getContacts();
+//        getContacts();
         }
 
         lvMain = findViewById(R.id.lvMain);
@@ -116,10 +116,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void addContact(View v) {
-        Intent intent = new Intent(this, PhoneActivity.class);
-        intent.putExtra("requestCode", ADD_CONTACT);
-        startActivityForResult(intent, ADD_CONTACT);
+    private void init() {
+        DBHelper dbHelper = new DBHelper(this);
+        ContentResolver contentResolver = getContentResolver();
+        PhoneModel model = new PhoneModel(dbHelper, contentResolver);
+        presenter = new PhonePresenter(model);
+        presenter.setView(this);
     }
 
     @Override
@@ -132,11 +134,19 @@ public class MainActivity extends AppCompatActivity {
                 }
         }
         if (READ_CONTACTS_GRANTED) {
-            getContacts();
+//            getContacts();
         } else {
             Toast.makeText(this, "Требуется установить разрешения", Toast.LENGTH_LONG).show();
         }
     }
+
+    public void addContact(View v) {
+        Intent intent = new Intent(this, PhoneActivity.class);
+        intent.putExtra("requestCode", ADD_CONTACT);
+        startActivityForResult(intent, ADD_CONTACT);
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -161,58 +171,9 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    /**
-     * @return список контактов приложения
-     */
-    private void getContacts() {
-        phoneBook.clear();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cur = db.query("phones", null, null, null, null, null, "LOWER(name)");
-        while (cur != null && cur.moveToNext()) {
-            int id = cur.getInt(cur.getColumnIndex("id"));
-            String name = cur.getString(cur.getColumnIndex("name"));
-            String phone = cur.getString(cur.getColumnIndex("phone"));
-            phoneBook.add(new Contact(id, name, phone));
-        }
-        cur.close();
-        dbHelper.close();
-    }
 
-    /**
-     * @return список контактов телефона
-     */
-    private List<Contact> getAndroidContacts() {
-        List<Contact> phoneBook = new ArrayList<>();
 
-        ContentResolver cr = getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null);
-        while (cur != null && cur.moveToNext()) {
-            String id = cur.getString(
-                    cur.getColumnIndex(ContactsContract.Contacts._ID));
-            String name = cur.getString(cur.getColumnIndex(
-                    ContactsContract.Contacts.DISPLAY_NAME));
 
-            if (cur.getInt(cur.getColumnIndex(
-                    ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                Cursor pCur = cr.query(
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                        new String[]{id}, null);
-                while (pCur.moveToNext()) {
-                    String phoneNo = pCur.getString(pCur.getColumnIndex(
-                            ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    phoneBook.add(new Contact(name, phoneNo));
-                }
-                pCur.close();
-            }
-        }
-        if (cur != null) {
-            cur.close();
-        }
-        return phoneBook;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
