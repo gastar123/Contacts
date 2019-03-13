@@ -77,6 +77,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        lvMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, DeleteActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+
         lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
             Animation anim = AnimationUtils.loadAnimation(MainActivity.this, R.anim.mytrans);
             Animation anim_two = AnimationUtils.loadAnimation(MainActivity.this, R.anim.anim_two);

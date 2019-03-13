@@ -33,14 +33,16 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         TextView tvNumber = convertView.findViewById(R.id.tvNumber);
         tvNumber.setText(contact.getPhone());
         ImageView call = convertView.findViewById(R.id.call);
-        call.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String call = "tel:" + contact.getPhone();
-                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(call));
-                getContext().startActivity(intent);
-            }
-        });
+        if (call != null) {
+            call.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String call = "tel:" + contact.getPhone();
+                    Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(call));
+                    getContext().startActivity(intent);
+                }
+            });
+        }
         return convertView;
     }
 }
