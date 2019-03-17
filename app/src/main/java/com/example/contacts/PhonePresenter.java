@@ -1,8 +1,6 @@
 package com.example.contacts;
 
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 
 public class PhonePresenter {
 
@@ -25,23 +23,34 @@ public class PhonePresenter {
         view.startActivityForResult(intent, ADD_CONTACT);
     }
 
-    public void returnActivity(Contact contact, boolean update) {
+    public void edit(Contact contact) {
+        Intent intent = new Intent(view, PhoneActivity.class);
+        intent.putExtra("requestCode", PhonePresenter.CHANGE_CONTACT);
+        intent.putExtra("contact", contact);
+        view.startActivityForResult(intent, PhonePresenter.CHANGE_CONTACT);
+    }
 
-        Contact contact = (Contact) data.getSerializableExtra("contact");
-        switch (requestCode) {
-            case CHANGE_CONTACT:
-                cv.put("name", contact.getName());
-                cv.put("phone", contact.getPhone());
-                db.update("phones", cv, "id = " + contact.getId(), null);
-                break;
-            case ADD_CONTACT:
-                cv.put("name", contact.getName());
-                cv.put("phone", contact.getPhone());
-                db.insert("phones", null, cv);
-                break;
+    public void returnActivity(Contact contact, int requestCode) {
+        if (requestCode == ADD_CONTACT) {
+            model.update(contact, false);
+        } else if (requestCode == CHANGE_CONTACT) {
+            model.update(contact, true);
         }
-        dbHelper.close();
-        getContacts();
-        adapter.notifyDataSetChanged();
+        view.updateView();
+    }
+
+    public void loadAll() {
+        model.getContacts();
+        view.updateView();
+    }
+
+    public void syncPhoneBook() {
+        model.syncPhoneBook();
+        view.updateView();
+    }
+
+    public void deletePhoneBook() {
+        model.deletePhoneBook();
+        view.updateView();
     }
 }

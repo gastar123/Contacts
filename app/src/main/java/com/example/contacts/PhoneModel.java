@@ -3,6 +3,7 @@ package com.example.contacts;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.ContactsContract;
 
@@ -26,7 +27,7 @@ public class PhoneModel {
     /**
      * @return список контактов приложения
      */
-    private void getContacts() {
+    public void getContacts() {
         phoneBook.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cur = db.query("phones", null, null, null, null, null, "LOWER(name)");
@@ -40,7 +41,7 @@ public class PhoneModel {
         dbHelper.close();
     }
 
-    private void update(Contact contact, boolean update) {
+    public void update(Contact contact, boolean update) {
         ContentValues cv = new ContentValues();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         cv.put("name", contact.getName());
@@ -51,18 +52,8 @@ public class PhoneModel {
         } else {
             db.insert("phones", null, cv);
         }
-    }
-
-    public void addContact() {
-        db.insert("phones", null, cv);
-    }
-
-    public void changeContact(Contact contact) {
-        ContentValues cv = new ContentValues();
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        cv.put("name", contact.getName());
-        cv.put("phone", contact.getPhone());
-        db.update("phones", cv, "id = " + contact.getId(), null);
+        dbHelper.close();
+        getContacts();
     }
 
     /**
@@ -98,5 +89,28 @@ public class PhoneModel {
             cur.close();
         }
         return phoneBook;
+    }
+
+    public void syncPhoneBook() {
+        ContentValues cv = new ContentValues();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        for (Contact c : getAndroidContacts()) {
+            try {
+                cv.put("name", c.getName());
+                cv.put("phone", c.getPhone().replaceAll("[ \\-()]", ""));
+                db.insert("phones", null, cv);
+            } catch (SQLiteConstraintException e) {
+            }
+        }
+        dbHelper.close();
+        getContacts();
+    }
+
+    public void deletePhoneBook() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.delete("phones", null, null);
+        dbHelper.close();
+        getContacts();
     }
 }

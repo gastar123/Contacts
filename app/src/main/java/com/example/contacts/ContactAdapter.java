@@ -16,16 +16,21 @@ import java.util.List;
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
     private Context context;
     private List<Contact> phoneBook;
+    private OnItemClickListener onItemClickListener;
 
-    public ContactAdapter(Context context, List<Contact> phonebook) {
-        this.phoneBook = phonebook;
+    public ContactAdapter(Context context, List<Contact> phoneBook) {
+        this.phoneBook = phoneBook;
         this.context = context;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
     @Override
     public ContactAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.contact, null);
+        View view = LayoutInflater.from(context).inflate(R.layout.contact, viewGroup, false);
         final ViewHolder viewHolder = new ViewHolder(view);
         viewHolder.call.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -36,6 +41,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                     Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(call));
                     context.startActivity(intent);
                 }
+            }
+        });
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int adapterPosition = viewHolder.getAdapterPosition();
+                onItemClickListener.onItemClick(phoneBook.get(adapterPosition));
             }
         });
         return viewHolder;
@@ -51,6 +64,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     @Override
     public int getItemCount() {
         return phoneBook.size();
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(Contact contact);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
