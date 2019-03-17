@@ -31,8 +31,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private PhonePresenter presenter;
-
     private ListView lvMain;
+    private ImageView imageView;
     private ArrayAdapter<Contact> adapter;
     static final int CHANGE_CONTACT = 1;
     static final int ADD_CONTACT = 2;
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         lvMain = findViewById(R.id.lvMain);
 
-        adapter = new ContactAdapter(this, R.layout.contact, phoneBook);
+        adapter = new ContactAdapter(this, R.layout.contact, );
         lvMain.setAdapter(adapter);
 
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
         lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
             Animation anim = AnimationUtils.loadAnimation(MainActivity.this, R.anim.mytrans);
             Animation anim_two = AnimationUtils.loadAnimation(MainActivity.this, R.anim.anim_two);
-            ImageView imageView = findViewById(R.id.imageView);
 
             private int prevFirstItem;
             private boolean start = true;
@@ -117,6 +116,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
+        imageView = findViewById(R.id.imageView);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.add();
+            }
+        });
+
         DBHelper dbHelper = new DBHelper(this);
         ContentResolver contentResolver = getContentResolver();
         PhoneModel model = new PhoneModel(dbHelper, contentResolver);
@@ -139,14 +146,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Требуется установить разрешения", Toast.LENGTH_LONG).show();
         }
     }
-
-    public void addContact(View v) {
-        Intent intent = new Intent(this, PhoneActivity.class);
-        intent.putExtra("requestCode", ADD_CONTACT);
-        startActivityForResult(intent, ADD_CONTACT);
-    }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

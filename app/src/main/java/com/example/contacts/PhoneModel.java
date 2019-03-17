@@ -1,6 +1,7 @@
 package com.example.contacts;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.ContactsContract;
@@ -18,6 +19,10 @@ public class PhoneModel {
         this.dbHelper = dbHelper;
     }
 
+    public List<Contact> getPhoneBook() {
+        return phoneBook;
+    }
+
     /**
      * @return список контактов приложения
      */
@@ -33,6 +38,31 @@ public class PhoneModel {
         }
         cur.close();
         dbHelper.close();
+    }
+
+    private void update(Contact contact, boolean update) {
+        ContentValues cv = new ContentValues();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        cv.put("name", contact.getName());
+        cv.put("phone", contact.getPhone());
+
+        if(update) {
+            db.update("phones", cv, "id = " + contact.getId(), null);
+        } else {
+            db.insert("phones", null, cv);
+        }
+    }
+
+    public void addContact() {
+        db.insert("phones", null, cv);
+    }
+
+    public void changeContact(Contact contact) {
+        ContentValues cv = new ContentValues();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        cv.put("name", contact.getName());
+        cv.put("phone", contact.getPhone());
+        db.update("phones", cv, "id = " + contact.getId(), null);
     }
 
     /**
