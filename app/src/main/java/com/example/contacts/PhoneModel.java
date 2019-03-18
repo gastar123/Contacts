@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 import android.provider.ContactsContract;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class PhoneModel {
     /**
      * @return список контактов приложения
      */
-    public void getContacts() {
+    private void getContacts() {
         phoneBook.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cur = db.query("phones", null, null, null, null, null, "LOWER(name)");
@@ -41,19 +42,37 @@ public class PhoneModel {
         dbHelper.close();
     }
 
-    public void update(Contact contact, boolean update) {
-        ContentValues cv = new ContentValues();
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        cv.put("name", contact.getName());
-        cv.put("phone", contact.getPhone());
+    public void getContacts(final Handler handler) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getContacts();
+                handler.sendEmptyMessage(1);
+            }
+        });
+        t.start();
+    }
 
-        if(update) {
-            db.update("phones", cv, "id = " + contact.getId(), null);
-        } else {
-            db.insert("phones", null, cv);
-        }
-        dbHelper.close();
-        getContacts();
+    public void update(final Contact contact, final boolean update, final Handler handler) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ContentValues cv = new ContentValues();
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                cv.put("name", contact.getName());
+                cv.put("phone", contact.getPhone());
+
+                if(update) {
+                    db.update("phones", cv, "id = " + contact.getId(), null);
+                } else {
+                    db.insert("phones", null, cv);
+                }
+                dbHelper.close();
+                getContacts();
+                handler.sendEmptyMessage(1);
+            }
+        });
+        t.start();
     }
 
     /**
@@ -91,26 +110,40 @@ public class PhoneModel {
         return phoneBook;
     }
 
-    public void syncPhoneBook() {
-        ContentValues cv = new ContentValues();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+    public void syncPhoneBook(final Handler handler) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ContentValues cv = new ContentValues();
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        for (Contact c : getAndroidContacts()) {
-            try {
-                cv.put("name", c.getName());
-                cv.put("phone", c.getPhone().replaceAll("[ \\-()]", ""));
-                db.insert("phones", null, cv);
-            } catch (SQLiteConstraintException e) {
+                for (Contact c : getAndroidContacts()) {
+                    try {
+                        cv.put("name", c.getName());
+                        cv.put("phone", c.getPhone().replaceAll("[ \\-()]", ""));
+                        db.insert("phones", null, cv);
+                    } catch (SQLiteConstraintException e) {
+                    }
+                }
+                dbHelper.close();
+                getContacts();
+                handler.sendEmptyMessage(1);
             }
-        }
-        dbHelper.close();
-        getContacts();
+        });
+        t.start();
     }
 
-    public void deletePhoneBook() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        db.delete("phones", null, null);
-        dbHelper.close();
-        getContacts();
+    public void deletePhoneBook(final Handler handler) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                db.delete("phones", null, null);
+                dbHelper.close();
+                getContacts();
+                handler.sendEmptyMessage(1);
+            }
+        });
+        t.start();
     }
 }

@@ -1,9 +1,11 @@
 package com.example.contacts;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 
 public class PhonePresenter {
-
+    private Handler handler;
     private MainActivity view;
     private final PhoneModel model;
     static final int CHANGE_CONTACT = 1;
@@ -11,6 +13,12 @@ public class PhonePresenter {
 
     public PhonePresenter(PhoneModel model) {
         this.model = model;
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                view.updateView();
+            }
+        };
     }
 
     public void setView(MainActivity view) {
@@ -32,25 +40,21 @@ public class PhonePresenter {
 
     public void returnActivity(Contact contact, int requestCode) {
         if (requestCode == ADD_CONTACT) {
-            model.update(contact, false);
+            model.update(contact, false, handler);
         } else if (requestCode == CHANGE_CONTACT) {
-            model.update(contact, true);
+            model.update(contact, true, handler);
         }
-        view.updateView();
     }
 
     public void loadAll() {
-        model.getContacts();
-        view.updateView();
+        model.getContacts(handler);
     }
 
     public void syncPhoneBook() {
-        model.syncPhoneBook();
-        view.updateView();
+        model.syncPhoneBook(handler);
     }
 
     public void deletePhoneBook() {
-        model.deletePhoneBook();
-        view.updateView();
+        model.deletePhoneBook(handler);
     }
 }
