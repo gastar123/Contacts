@@ -11,12 +11,12 @@ public class PhonePresenter {
     static final int CHANGE_CONTACT = 1;
     static final int ADD_CONTACT = 2;
 
-    public PhonePresenter(PhoneModel model) {
+    public PhonePresenter(final PhoneModel model) {
         this.model = model;
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                view.updateView();
+                view.updateView(model.getPhoneBook());
             }
         };
     }

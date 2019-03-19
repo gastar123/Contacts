@@ -27,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     private PhonePresenter presenter;
     private RecyclerView rvMain;
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        adapter = new ContactAdapter(this, model.getPhoneBook());
+        adapter = new ContactAdapter(this);
         adapter.setOnItemClickListener(new ContactAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Contact contact) {
@@ -115,8 +117,8 @@ public class MainActivity extends AppCompatActivity {
         rvMain.setAdapter(adapter);
     }
 
-    public void updateView() {
-        adapter.notifyDataSetChanged();
+    public void updateView(List<Contact> phoneBook) {
+        adapter.changeData(phoneBook);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         if (data == null) return;
         Contact contact = (Contact) data.getSerializableExtra("contact");
         presenter.returnActivity(contact, requestCode);
-        updateView();
+//        updateView();
     }
 
     @Override

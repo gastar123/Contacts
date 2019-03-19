@@ -11,16 +11,22 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
     private Context context;
-    private List<Contact> phoneBook;
+    private final List<Contact> phoneBook = new ArrayList<>();
     private OnItemClickListener onItemClickListener;
 
-    public ContactAdapter(Context context, List<Contact> phoneBook) {
-        this.phoneBook = phoneBook;
+    public ContactAdapter(Context context) {
         this.context = context;
+    }
+
+    public void changeData(List<Contact> phoneBook) {
+        this.phoneBook.clear();
+        this.phoneBook.addAll(phoneBook);
+        notifyDataSetChanged();
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
