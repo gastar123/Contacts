@@ -6,7 +6,7 @@ import android.os.Message;
 
 public class PhonePresenter {
     private Handler handler;
-    private MainActivity view;
+    private ParentActivity view;
     private final PhoneModel model;
     static final int CHANGE_CONTACT = 1;
     static final int ADD_CONTACT = 2;
@@ -21,7 +21,7 @@ public class PhonePresenter {
         };
     }
 
-    public void setView(MainActivity view) {
+    public void setView(ParentActivity view) {
         this.view = view;
     }
 
@@ -36,6 +36,11 @@ public class PhonePresenter {
         intent.putExtra("requestCode", PhonePresenter.CHANGE_CONTACT);
         intent.putExtra("contact", contact);
         view.startActivityForResult(intent, PhonePresenter.CHANGE_CONTACT);
+    }
+
+    public void delete(Contact contact) {
+        Intent intent = new Intent(view, DeleteActivity.class);
+        view.startActivity(intent);
     }
 
     public void returnActivity(Contact contact, int requestCode) {

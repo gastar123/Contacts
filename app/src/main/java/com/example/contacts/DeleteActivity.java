@@ -1,18 +1,40 @@
 package com.example.contacts;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.ContentResolver;
 import android.os.Bundle;
-import android.widget.ListView;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.RecyclerView;
 
-public class DeleteActivity extends AppCompatActivity {
+import java.util.List;
 
-    private ListView lvDelete;
+public class DeleteActivity extends ParentActivity {
+    private PhonePresenter presenter;
+    private RecyclerView rvDelete;
+    private ContactAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.delete_contacts);
+        init();
+    }
 
-        lvDelete = findViewById(R.id.lvDelete);
+    private void init() {
+        DBHelper dbHelper = new DBHelper(this);
+        ContentResolver contentResolver = getContentResolver();
+        PhoneModel model = new PhoneModel(dbHelper, contentResolver);
+        presenter = new PhonePresenter(model);
+        presenter.setView(this);
+
+        rvDelete = findViewById(R.id.rvDelete);
+        rvDelete.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        adapter = new ContactAdapter(this);
+        rvDelete.setAdapter(adapter);
+        presenter.loadAll();
+    }
+
+    @Override
+    public void updateView(List<Contact> phoneBook) {
+        adapter.changeData(phoneBook);
     }
 }

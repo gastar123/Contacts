@@ -2,34 +2,25 @@ package com.example.contacts;
 
 import android.Manifest;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteConstraintException;
-import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ParentActivity {
     private PhonePresenter presenter;
     private RecyclerView rvMain;
     private ImageView imageView;
@@ -61,15 +52,6 @@ public class MainActivity extends AppCompatActivity {
             presenter.loadAll();
         }
 
-//        rvMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                Intent intent = new Intent(MainActivity.this, DeleteActivity.class);
-//                startActivity(intent);
-//                return false;
-//            }
-//        });
-
         rvMain.addOnScrollListener(new RecyclerView.OnScrollListener() {
             Animation anim = AnimationUtils.loadAnimation(MainActivity.this, R.anim.mytrans);
             Animation anim_two = AnimationUtils.loadAnimation(MainActivity.this, R.anim.anim_two);
@@ -100,23 +82,15 @@ public class MainActivity extends AppCompatActivity {
         rvMain = findViewById(R.id.rvMain);
         rvMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         imageView = findViewById(R.id.imageView);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.add();
-            }
-        });
+        imageView.setOnClickListener(v -> presenter.add());
 
         adapter = new ContactAdapter(this);
-        adapter.setOnItemClickListener(new ContactAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Contact contact) {
-                presenter.edit(contact);
-            }
-        });
+        adapter.setOnItemClickListener(contact -> presenter.edit(contact));
+        adapter.setOnItemLongClickListener(contact -> presenter.delete(contact));
         rvMain.setAdapter(adapter);
     }
 
+    @Override
     public void updateView(List<Contact> phoneBook) {
         adapter.changeData(phoneBook);
     }
@@ -142,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
         if (data == null) return;
         Contact contact = (Contact) data.getSerializableExtra("contact");
         presenter.returnActivity(contact, requestCode);
-//        updateView();
     }
 
     @Override

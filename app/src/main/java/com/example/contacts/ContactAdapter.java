@@ -18,6 +18,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     private Context context;
     private final List<Contact> phoneBook = new ArrayList<>();
     private OnItemClickListener onItemClickListener;
+    private OnItemClickListener onItemLongClickListener;
 
     public ContactAdapter(Context context) {
         this.context = context;
@@ -33,22 +34,24 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         this.onItemClickListener = onItemClickListener;
     }
 
+    public void setOnItemLongClickListener(OnItemClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
     @NonNull
     @Override
     public ContactAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.contact, viewGroup, false);
         final ViewHolder viewHolder = new ViewHolder(view);
-        viewHolder.call.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int adapterPosition = viewHolder.getAdapterPosition();
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    String call = "tel:" + phoneBook.get(adapterPosition).getPhone();
-                    Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(call));
-                    context.startActivity(intent);
-                }
+        viewHolder.call.setOnClickListener(v -> {
+            int adapterPosition = viewHolder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                String call = "tel:" + phoneBook.get(adapterPosition).getPhone();
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(call));
+                context.startActivity(intent);
             }
         });
+
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +60,16 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 onItemClickListener.onItemClick(phoneBook.get(adapterPosition));
             }
         });
+
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                int adapterPosition = viewHolder.getAdapterPosition();
+                onItemLongClickListener.onItemClick(phoneBook.get(adapterPosition));
+                return false;
+            }
+        });
+
         return viewHolder;
     }
 
