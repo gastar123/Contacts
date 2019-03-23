@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
+import java.util.Collection;
+
 public class PhonePresenter {
     private Handler handler;
     private ParentActivity view;
@@ -41,6 +43,10 @@ public class PhonePresenter {
     public void delete(Contact contact) {
         Intent intent = new Intent(view, DeleteActivity.class);
         view.startActivity(intent);
+    }
+
+    public void onDeleteContact(Collection<Integer> idList) {
+        model.deleteContact(idList, handler);
     }
 
     public void returnActivity(Contact contact, int requestCode) {

@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class PhoneModel {
@@ -23,6 +24,22 @@ public class PhoneModel {
 
     public List<Contact> getPhoneBook() {
         return phoneBook;
+    }
+
+    public void deleteContact(Collection<Integer> idList, Handler handler) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (Integer id : idList) {
+                    SQLiteDatabase db = dbHelper.getReadableDatabase();
+                    db.delete("phones", "id = " + id, null);
+                }
+                dbHelper.close();
+                getContacts();
+                handler.sendEmptyMessage(1);
+            }
+        });
+        t.start();
     }
 
     /**

@@ -91,6 +91,12 @@ public class MainActivity extends ParentActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        presenter.loadAll();
+    }
+
+    @Override
     public void updateView(List<Contact> phoneBook) {
         adapter.changeData(phoneBook);
     }
