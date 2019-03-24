@@ -10,9 +10,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -139,5 +141,18 @@ public class MainActivity extends ParentActivity {
             presenter.deletePhoneBook();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public int getScrollPosition() {
+        return ((LinearLayoutManager) rvMain.getLayoutManager()).findFirstVisibleItemPosition();
+    }
+
+    @Override
+    public int getScrollOffset() {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) rvMain.getLayoutManager();
+        View v = layoutManager.getChildAt(0);
+        int top = (v == null) ? 0 : (v.getTop() - layoutManager.getPaddingTop());
+        return top;
     }
 }

@@ -3,7 +3,9 @@ package com.example.contacts;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Button;
 
 import java.util.List;
@@ -41,5 +43,21 @@ public class DeleteActivity extends ParentActivity {
     @Override
     public void updateView(List<Contact> phoneBook) {
         adapter.changeData(phoneBook);
+        int scrollPosition = getIntent().getExtras().getInt("scrollPosition");
+        int scrollOffset = getIntent().getExtras().getInt("scrollOffset");
+        ((LinearLayoutManager) rvDelete.getLayoutManager()).scrollToPositionWithOffset(scrollPosition, scrollOffset);
+    }
+
+    @Override
+    public int getScrollPosition() {
+        return ((LinearLayoutManager) rvDelete.getLayoutManager()).findFirstVisibleItemPosition();
+    }
+
+    @Override
+    public int getScrollOffset() {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) rvDelete.getLayoutManager();
+        View v = layoutManager.getChildAt(0);
+        int top = (v == null) ? 0 : (v.getTop() - layoutManager.getPaddingTop());
+        return top;
     }
 }

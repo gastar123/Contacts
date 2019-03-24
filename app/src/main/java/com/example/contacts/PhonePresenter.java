@@ -42,6 +42,8 @@ public class PhonePresenter {
 
     public void delete(Contact contact) {
         Intent intent = new Intent(view, DeleteActivity.class);
+        intent.putExtra("scrollPosition", view.getScrollPosition());
+        intent.putExtra("scrollOffset", view.getScrollOffset());
         view.startActivity(intent);
     }
 
