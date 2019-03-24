@@ -33,7 +33,7 @@ public class PhoneModel {
             public void run() {
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
                 db.delete("phones", "id in (" + TextUtils.join(",", idList) + ")", null);
-                dbHelper.close();
+                db.close();
                 getContacts();
                 handler.sendEmptyMessage(1);
             }
@@ -55,7 +55,7 @@ public class PhoneModel {
             phoneBook.add(new Contact(id, name, phone));
         }
         cur.close();
-        dbHelper.close();
+        db.close();
     }
 
     public void getContacts(final Handler handler) {
@@ -83,7 +83,7 @@ public class PhoneModel {
                 } else {
                     db.insert("phones", null, cv);
                 }
-                dbHelper.close();
+                db.close();
                 getContacts();
                 handler.sendEmptyMessage(1);
             }
@@ -141,7 +141,7 @@ public class PhoneModel {
                     } catch (SQLiteConstraintException e) {
                     }
                 }
-                dbHelper.close();
+                db.close();
                 getContacts();
                 handler.sendEmptyMessage(1);
             }
@@ -155,7 +155,7 @@ public class PhoneModel {
             public void run() {
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
                 db.delete("phones", null, null);
-                dbHelper.close();
+                db.close();
                 getContacts();
                 handler.sendEmptyMessage(1);
             }
