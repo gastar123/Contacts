@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.provider.ContactsContract;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,10 +31,8 @@ public class PhoneModel {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                for (Integer id : idList) {
-                    SQLiteDatabase db = dbHelper.getReadableDatabase();
-                    db.delete("phones", "id = " + id, null);
-                }
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                db.delete("phones", "id in (" + TextUtils.join(",", idList) + ")", null);
                 dbHelper.close();
                 getContacts();
                 handler.sendEmptyMessage(1);
@@ -79,7 +78,7 @@ public class PhoneModel {
                 cv.put("name", contact.getName());
                 cv.put("phone", contact.getPhone());
 
-                if(update) {
+                if (update) {
                     db.update("phones", cv, "id = " + contact.getId(), null);
                 } else {
                     db.insert("phones", null, cv);
