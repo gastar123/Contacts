@@ -39,7 +39,6 @@ public class MainActivity extends ParentActivity {
         setContentView(R.layout.list_view);
         init();
 
-
 // получаем разрешения
         int hasReadContactPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS);
         // если устройство до API 23, устанавливаем разрешение

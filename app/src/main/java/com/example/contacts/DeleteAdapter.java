@@ -44,7 +44,7 @@ public class DeleteAdapter extends RecyclerView.Adapter<DeleteAdapter.ViewHolder
                 int adapterPosition = viewHolder.getAdapterPosition();
                 if (isChecked) {
                     idList.add(phoneBook.get(adapterPosition).getId());
-                } else if (!isChecked) {
+                } else {
                     idList.remove(phoneBook.get(adapterPosition).getId());
                 }
             }
