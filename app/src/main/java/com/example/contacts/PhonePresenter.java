@@ -3,6 +3,7 @@ package com.example.contacts;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Toast;
 
 import java.util.Collection;
 
@@ -18,7 +19,11 @@ public class PhonePresenter {
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                view.updateView(model.getPhoneBook());
+                if (msg.what == -1) {
+                    showError(msg.getData().getString("error"));
+                } else if (msg.what == 1) {
+                    view.updateView(model.getPhoneBook());
+                }
             }
         };
     }
@@ -44,7 +49,7 @@ public class PhonePresenter {
         Intent intent = new Intent(view, DeleteActivity.class);
         intent.putExtra("scrollPosition", view.getScrollPosition());
         intent.putExtra("scrollOffset", view.getScrollOffset());
-        view.startActivity(intent);
+        view.startActivityForResult(intent, 3);
     }
 
     public void onDeleteContact(Collection<Integer> idList) {
@@ -69,5 +74,9 @@ public class PhonePresenter {
 
     public void deletePhoneBook() {
         model.deletePhoneBook(handler);
+    }
+
+    public void showError(String errorText) {
+        Toast.makeText(view, errorText, Toast.LENGTH_SHORT).show();
     }
 }

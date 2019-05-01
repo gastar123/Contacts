@@ -5,7 +5,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 
@@ -48,7 +50,10 @@ public class PhoneModel {
         phoneBook.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cur = db.query("phones", null, null, null, null, null, "LOWER(name)");
-        while (cur != null && cur.moveToNext()) {
+        if (cur == null) {
+            return;
+        }
+        while (cur.moveToNext()) {
             int id = cur.getInt(cur.getColumnIndex("id"));
             String name = cur.getString(cur.getColumnIndex("name"));
             String phone = cur.getString(cur.getColumnIndex("phone"));
@@ -78,14 +83,31 @@ public class PhoneModel {
                 cv.put("name", contact.getName());
                 cv.put("phone", contact.getPhone());
 
-                if (update) {
-                    db.update("phones", cv, "id = " + contact.getId(), null);
-                } else {
-                    db.insert("phones", null, cv);
+                try {
+                    if (update) {
+                        int phones = db.update("phones", cv, "id = " + contact.getId(), null);
+                        if (phones == 0) {
+                            throw new SQLiteConstraintException();
+                        }
+                    } else {
+                        long phones = db.insert("phones", null, cv);
+                        if (phones == -1) {
+                            throw new SQLiteConstraintException();
+                        }
+                    }
+
+                    getContacts();
+                    handler.sendEmptyMessage(1);
+                } catch (SQLiteConstraintException e) {
+                    Message msg = Message.obtain();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("error", "Такой контакт уже существует");
+                    msg.setData(bundle);
+                    msg.what = -1;
+                    handler.sendMessage(msg);
+                } finally {
+                    db.close();
                 }
-                db.close();
-                getContacts();
-                handler.sendEmptyMessage(1);
             }
         });
         t.start();

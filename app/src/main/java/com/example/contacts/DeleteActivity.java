@@ -40,6 +40,12 @@ public class DeleteActivity extends ParentActivity {
         btnDelete.setOnClickListener(v -> presenter.onDeleteContact(adapter.getIdList()));
     }
 
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        setResult(RESULT_OK, );
+//    }
+
     @Override
     public void updateView(List<Contact> phoneBook) {
         adapter.changeData(phoneBook);

@@ -91,11 +91,11 @@ public class MainActivity extends ParentActivity {
         rvMain.setAdapter(adapter);
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        presenter.loadAll();
-    }
+//    @Override
+//    protected void onRestart() {
+//        super.onRestart();
+//        presenter.loadAll();
+//    }
 
     @Override
     public void updateView(List<Contact> phoneBook) {
@@ -120,6 +120,9 @@ public class MainActivity extends ParentActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 3) {
+            presenter.loadAll();
+        }
         if (data == null) return;
         Contact contact = (Contact) data.getSerializableExtra("contact");
         presenter.returnActivity(contact, requestCode);
